@@ -9,44 +9,63 @@ questions = {
 }
 
 def handle_client(client_socket):
-    # Wait for the client to send the "START" signal
-    response = client_socket.recv(1024).decode()
-    if response.strip().upper() != "START":
-        client_socket.send("STATUS:400:Expected 'START' to begin".encode())
+    score = 0  # Initial score
+    
+    # Receive initial "START" message
+    response = client_socket.recv(1024).decode().strip()
+    print(f"Received from client: {response}")  # Debug: print the received message
+    
+    if response != "START":
+        client_socket.send("STATUS:400:Bad Request\n".encode())
         client_socket.close()
         return
     
-    # Initialize score and start the quiz
-    score = 0
-    for q_id, q_data in questions.items():
+    # If "START" received, send a dashed line to separate start state from questions
+    client_socket.send("DASHLINE:--------------------\n".encode())
+    time.sleep(0.1)
+    
+    # Proceed with the quiz
+    for q_id in questions:
+        q_data = questions[q_id]
+        
         # Send question to client
-        question_message = f"QUESTION:{q_id}:{q_data['text']}"
+        question_message = f"QUESTION:{q_id}:{q_data['text']}\n"
         client_socket.send(question_message.encode())
         
-        # Receive answer from client
-        response = client_socket.recv(1024).decode()
-        parts = response.split(':')
+        # Send dashed line to separate questions
+        time.sleep(0.1)
+        client_socket.send("DASHLINE:--------------------\n".encode())
         
-        # Check if answer is valid and correct
-        if parts[0] == "ANSWER" and int(parts[1]) == q_id:
+        # Receive answer from client
+        response = client_socket.recv(1024).decode().strip()
+        print(f"Received from client: {response}")  # Debug: print the received message
+        
+        # Split the response and validate
+        parts = response.split(':')
+        print(f"Parsed parts: {parts}")  # Additional debug to see the parsed parts
+        
+        # Validate the format and answer
+        if len(parts) == 3 and parts[0] == "ANSWER":
             client_answer = parts[2].strip().lower()
             correct_answer = q_data["answer"].strip().lower()
-            
+            print(f"Client answer: {client_answer}, Correct answer: {correct_answer}")  # Debug
+
             if client_answer == correct_answer:
                 score += 1
-                client_socket.send("STATUS:200:Correct".encode())
+                client_socket.send("STATUS:200:Correct\n".encode())
             else:
-                client_socket.send("STATUS:200:Incorrect".encode())
+                client_socket.send("STATUS:200:Incorrect\n".encode())
         else:
-            client_socket.send("STATUS:400:Bad Request".encode())
+            print("Bad request detected.")  # Debug to see if condition fails
+            client_socket.send("STATUS:400:Bad Request\n".encode())
         
-        # Separate each message with a small delay
-        time.sleep(0.1)  # Small delay to ensure separate transmission
-        client_socket.send(f"SCORE:{score}".encode())
-        time.sleep(0.1)  # Delay before the next question or closing message
+        # Send score after each question
+        time.sleep(0.1)
+        client_socket.send(f"SCORE:{score}\n".encode())
+        time.sleep(0.1)
 
     # Inform the client that the quiz is complete
-    client_socket.send("STATUS:200:Quiz Complete".encode())
+    client_socket.send("STATUS:200:Quiz Complete\n".encode())
     client_socket.close()
 
 def start_server():
