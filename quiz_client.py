@@ -5,6 +5,15 @@ def start_client():
     client_socket.connect(('localhost', 12345))
     
     try:
+        # Prompt user to type "start" to begin the quiz
+        while True:
+            start_command = input("Type 'start' to begin the quiz: ").strip().lower()
+            if start_command == "start":
+                client_socket.send("START".encode())
+                break
+            else:
+                print("Please type 'start' to begin.")
+        
         while True:
             # Receive message from the server
             response = client_socket.recv(1024).decode()

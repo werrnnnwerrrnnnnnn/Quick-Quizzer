@@ -9,7 +9,15 @@ questions = {
 }
 
 def handle_client(client_socket):
-    score = 0  # Initial score
+    # Wait for the client to send the "START" signal
+    response = client_socket.recv(1024).decode()
+    if response.strip().upper() != "START":
+        client_socket.send("STATUS:400:Expected 'START' to begin".encode())
+        client_socket.close()
+        return
+    
+    # Initialize score and start the quiz
+    score = 0
     for q_id, q_data in questions.items():
         # Send question to client
         question_message = f"QUESTION:{q_id}:{q_data['text']}"
