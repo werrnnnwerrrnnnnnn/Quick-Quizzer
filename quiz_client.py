@@ -1,20 +1,18 @@
 import socket
 
-import socket
-
 def start_client():
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect(('localhost', 12345))
     
     try:
-        # Prompt user to type "start" to begin the quiz
+        # Prompt user to enter level directly to begin the quiz
         while True:
-            start_command = input("Type 'start' to begin the quiz: ").strip().lower()
-            if start_command == "start":
-                client_socket.send("START\n".encode())
+            level = input("\nChoose a level to begin the quiz (easy, medium, hard): ").strip().lower()
+            if level in ["easy", "medium", "hard"]:
+                client_socket.send(f"{level}\n".encode())
                 break
             else:
-                print("Please type 'start' to begin.")
+                print("Invalid level. Please type 'easy', 'medium', or 'hard'.")
         
         while True:
             # Receive message from the server and split by newline
@@ -26,7 +24,7 @@ def start_client():
                 
                 # Process different types of messages
                 if parts[0] == "QUESTION":
-                    print(f"Question {parts[1]}: {parts[2]}")
+                    print(f"\n📝 Question {parts[1]}: {parts[2]}")
                     answer = input("Your answer: ")
                     answer_message = f"ANSWER:{parts[1]}:{answer}\n"
                     client_socket.send(answer_message.encode())
@@ -35,12 +33,13 @@ def start_client():
                     print(parts[1])  # Print the dashed line
                 
                 elif parts[0] == "SCORE":
-                    print(f"Your current score: {parts[1]}")
+                    print(f"🏆 {parts[1]}")
                 
                 elif parts[0] == "STATUS":
-                    print(f"Status: {parts[1]} - {parts[2]}")
+                    print(f"ℹ️ {parts[1]} - {parts[2]}")
                     # Break if quiz is complete
                     if parts[2] == "Quiz Complete":
+                        print("\nThank you for playing! 🎉")
                         return  # Exit the loop
     
     except KeyboardInterrupt:

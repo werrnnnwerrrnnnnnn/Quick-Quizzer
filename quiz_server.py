@@ -1,32 +1,48 @@
 import socket
 import time
 
-# Define questions and answers
+# Define questions for different levels
 questions = {
-    1: {"text": "What is the capital of France?", "answer": "Paris"},
-    2: {"text": "What is 2 + 2?", "answer": "4"},
-    3: {"text": "Who wrote 'To Kill a Mockingbird'?", "answer": "Harper Lee"}
+    "easy": {
+        1: {"text": "What is 1 + 1?", "answer": "2"},
+        2: {"text": "What is 2 + 3?", "answer": "5"},
+        3: {"text": "What is 5 - 2?", "answer": "3"}
+    },
+    "medium": {
+        1: {"text": "What is 12 * 3?", "answer": "36"},
+        2: {"text": "What is 15 / 3?", "answer": "5"},
+        3: {"text": "What is 9 + 6?", "answer": "15"}
+    },
+    "hard": {
+        1: {"text": "What is 25 * 4?", "answer": "100"},
+        2: {"text": "What is 50 / 2?", "answer": "25"},
+        3: {"text": "What is 10 + 15 * 2?", "answer": "40"}
+    }
 }
 
 def handle_client(client_socket):
     score = 0  # Initial score
-    
-    # Receive initial "START" message
-    response = client_socket.recv(1024).decode().strip()
+
+    # Receive initial level message from client
+    response = client_socket.recv(1024).decode().strip().lower()
     print(f"Received from client: {response}")  # Debug: print the received message
-    
-    if response != "START":
-        client_socket.send("STATUS:400:Bad Request\n".encode())
+
+    # Check if level is valid
+    if response not in questions:
+        client_socket.send("STATUS:400:Invalid Level\n".encode())
         client_socket.close()
         return
-    
-    # If "START" received, send a dashed line to separate start state from questions
-    client_socket.send("DASHLINE:--------------------\n".encode())
+
+    level = response  # Set the level based on client input
+
+    # Confirm level selection to the client
+    client_socket.send(f"\nSTATUS:200: Level '{level.capitalize()}' Selected 🎉\n".encode())
     time.sleep(0.1)
+    client_socket.send("DASHLINE:============================\n".encode())
     
-    # Proceed with the quiz
-    for q_id in questions:
-        q_data = questions[q_id]
+    # Proceed with the quiz based on selected level
+    for q_id in questions[level]:
+        q_data = questions[level][q_id]
         
         # Send question to client
         question_message = f"QUESTION:{q_id}:{q_data['text']}\n"
@@ -34,7 +50,7 @@ def handle_client(client_socket):
         
         # Send dashed line to separate questions
         time.sleep(0.1)
-        client_socket.send("DASHLINE:--------------------\n".encode())
+        client_socket.send("DASHLINE:----------------------------\n".encode())
         
         # Receive answer from client
         response = client_socket.recv(1024).decode().strip()
@@ -52,20 +68,21 @@ def handle_client(client_socket):
 
             if client_answer == correct_answer:
                 score += 1
-                client_socket.send("STATUS:200:Correct\n".encode())
+                client_socket.send("STATUS:200: Correct! 🎉\n".encode())
             else:
-                client_socket.send("STATUS:200:Incorrect\n".encode())
+                client_socket.send("STATUS:200: Incorrect ❌\n".encode())
         else:
             print("Bad request detected.")  # Debug to see if condition fails
-            client_socket.send("STATUS:400:Bad Request\n".encode())
+            client_socket.send("STATUS:400: Bad Request\n".encode())
         
         # Send score after each question
         time.sleep(0.1)
-        client_socket.send(f"SCORE:{score}\n".encode())
+        client_socket.send(f"SCORE: Your current score is {score} 🏆\n".encode())
         time.sleep(0.1)
 
     # Inform the client that the quiz is complete
-    client_socket.send("STATUS:200:Quiz Complete\n".encode())
+    client_socket.send("DASHLINE:============================\n".encode())
+    client_socket.send("STATUS:200: Quiz Complete! 🏁\n".encode())
     client_socket.close()
 
 def start_server():
