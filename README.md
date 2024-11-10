@@ -1,38 +1,57 @@
 # QuickQuizzer 🎉
-Welcome to **QuickQuizzer** – a fun, interactive quiz game you can play directly from your terminal! 
-Test your knowledge with a series of questions and see how high you can score!
+Welcome to **QuickQuizzer** – an interactive terminal quiz game with two modes: **Math Quiz** and **Hangman**!
 
-### How to Play 🕹️
-QuickQuizzer is a simple question-and-answer game. The server asks a series of questions, and the client (that's you!) responds with your best answers.
+## 📍 How to Play 
+1. **Choose Game Mode**: Select either `math` or `hangman` to start.
+2. **Follow Prompts**: Answer questions or guess letters based on the mode.
+3. **Scoring**: Points for correct answers. See real-time feedback on your guesses.
+4. **Game Over**: View your final score and performance summary.
 
-1. **Start the Game**: Begin by typing `start` when prompted.
-2. **Answer Questions**: After each question is displayed, type in your answer and press Enter.
-3. **Scoring**: For each correct answer, you'll get a point. If you’re incorrect, don’t worry – just try your best on the next one!
-4. **End of Quiz**: After all questions are answered, you’ll receive your final score.
-
-### Requirements 📋
+### 📍 Requirements 
 - Python 3.x installed on your machine
 - A terminal to run the server and clien
 
-### Commands to Run the Game 💻
-**Step 1: Start the Server**
-- In one terminal window, navigate to the directory where `quiz_server.py` is located, and run: ```python3 quiz_server.py```
-- You should see a message saying: ``` Server is listening on port 12345... ```
-- This means the server is ready and waiting for the client to connect.
+### 📍 Start the Game
+- Step 1: Start the Server
+    - Navigate to the directory where `quiz_server.py` is located, and run: ```python3 quiz_server.py```
+    - You should see: ``` Server is listening on port 12345... ```
 
-**Step 2: Start the Client**
-- In the other terminal window, navigate to the same directory, and run: ```python3 quiz_client.py```
-- This will connect the client to the server. You’ll see:```Type 'start' to begin the quiz:```
-- Type `start` and hit Enter to begin the quiz!
+- Step 2: Start the Client
+    - Navigate to the same directory, and run: ```python3 quiz_client.py```
+    - You should see: ```Type 'start' to begin the quiz:```
+    - Type `start` and hit Enter to begin the quiz!
 
-### Important Notes ⚠️
-- Ensure that the server is running before starting the client.
-- Both the server and client must run on the same machine or local network to connect properly.
+### 📍 Important Notes
+- Run server first, then connect with the client.
+- Ensure server and client are on the same network.
 - Use the exact command format for answers, or you may get a "Bad Request" error.
 
-### Features ✨
-- **Real-time Feedback**: Know immediately whether your answer was correct or incorrect.
-- **Score Tracking**: See your score updated after each question.
-- **Simple Commands**: Just type and play – it’s that easy!
-
 Enjoy the quiz, and good luck! 🧠✨
+
+<!-- ------------------------------------------------------- -->
+### 📍 Math Quiz Mode
+
+| Status Code        | Phrase                                          | Description                                                  |
+|--------------------|-------------------------------------------------|--------------------------------------------------------------|
+| 200 OK             | Alphabet Detected                               | When an alphabet is typed as part of an answer               |
+| 200 OK             | Correct Answer                                  | When the answer is correct                                   |
+| 200 OK             | Answer Received in Time                         | When the answer is received within the timeout period        |
+| 200 OK             | Level Chosen - Easy                             | When the level “easy” is selected                            |
+| 200 OK             | Level Chosen - Medium                           | When the level “medium” is selected                          |
+| 200 OK             | Level Chosen - Hard                             | When the level “hard” is selected                            |
+| 400 Bad Request    | Invalid Character - Number Expected             | When an answer is expected to be a number                    |
+| 400 Bad Request    | Invalid Character - Special Character Detected  | When a special character is detected                         |
+| 400 Bad Request    | Invalid Level                                   | When an invalid level is selected                            |
+| 404 Not Found      | Wrong Answer                                    | When the answer is incorrect                                 |
+| 408 Request Timeout| Time Exceeded                                   | When the answer times out                                    |
+
+### 📍 Hangman Mode
+
+| Status Code        | Phrase                                          | Description                                                  |
+|--------------------|-------------------------------------------------|--------------------------------------------------------------|
+| 200 OK             | Alphabet Detected                               | When an alphabet letter is typed                             |
+| 200 OK             | Correct Guess                                   | For a correct guess                                          |
+| 200 OK             | Already Guessed                                 | When the user tries to guess a previously guessed letter     |
+| 400 Bad Request    | Invalid Character - Number Detected             | When a number is typed                                       |
+| 400 Bad Request    | Invalid Character - Special Character Detected  | When a special character is typed                            |
+| 404 Not Found      | Wrong Guess                                     | For an incorrect guess                                       |
