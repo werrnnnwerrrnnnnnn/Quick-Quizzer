@@ -151,29 +151,37 @@ def handle_hangman(client_socket, client_id):
 
         response = client_socket.recv(1024).decode().strip().lower()
         if not response or len(response) != 1 or not response.isalpha():
-            client_socket.send("STATUS:400:Invalid input. Please guess a single letter.\n".encode())
+            if response.isdigit():
+                client_socket.send("STATUS:400 Bad Request: Invalid Character - Number Detected\n".encode())
+            elif not response.isalnum():
+                client_socket.send("STATUS:400 Bad Request: Invalid Character - Special Character Detected\n".encode())
+            else:
+                client_socket.send("STATUS:400 Bad Request: Invalid Input\n".encode())
             continue
 
         if response in guessed_letters:
-            client_socket.send("STATUS:200:Letter already guessed. Try again.\n".encode())
+            client_socket.send("STATUS:409:Conflict - Letter already guessed. Try again.\n".encode())
             continue
 
         guessed_letters.add(response)
 
         if response in word:
-            client_socket.send("STATUS:Correct guess! 🎉\n".encode())
             display_word = "".join([letter if letter in guessed_letters else "_" for letter in word])
+            if "_" not in display_word:
+                client_socket.send(f"STATUS:200 OK: Congratulations! You guessed the word '{word}'! 🎉\n".encode())
+                log_message(client_id, "Player successfully guessed the word.")
+                break
+            else:
+                client_socket.send("STATUS:200 OK - Correct guess! 🎉\n".encode())
         else:
-            client_socket.send("STATUS:Incorrect guess. ❌\n".encode())
+            client_socket.send("STATUS:404 Not Found: Wrong Guess ❌\n".encode())
             attempts_left -= 1
 
         log_message(client_id, f"Guessed '{response}', Attempts left: {attempts_left}, Word: {display_word}")
 
-    # Send final message based on game outcome
-    if "_" not in display_word:
-        client_socket.send(f"STATUS:Congratulations! You guessed the word '{word}'! 🎉\n".encode())
-    else:
-        client_socket.send(f"STATUS:Game Over! The word was '{word}'. Better luck next time! ❌\n".encode())
+    if "_" in display_word:
+        client_socket.send(f"STATUS:404:Game Over - The word was '{word}'. Better luck next time! ❌\n".encode())
+        log_message(client_id, "Game over. Player failed to guess the word.")
 
     client_socket.close()
 

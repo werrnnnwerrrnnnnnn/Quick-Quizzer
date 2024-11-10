@@ -43,7 +43,7 @@ def start_client():
                     elif parts[0] == "SCORE":
                         print(f"🏆 {message}")
                     elif parts[0] == "STATUS":
-                        print(f"ℹ️ {message}")
+                        print(f"📣 {message}")
                         if "Quiz Complete" in message:
                             print("\nThank you for playing! 🎉")
                             return
@@ -58,23 +58,19 @@ def start_client():
 
                 messages = response.split('\n')
                 for message in messages:
-                    parts = message.split(':')
-
-                    # Handle Hangman messages
+                    parts = message.split(':', 1)
                     if parts[0] == "WELCOME":
-                        # Safely print the welcome message if it has two parts
-                        print(parts[1].strip() if len(parts) > 1 else message)
+                        print(parts[1].strip())
                     elif parts[0] == "WORD":
-                        print(f"\n🔤 Current Word: {parts[1].strip() if len(parts) > 1 else ''}")
+                        print(f"\n🔤 Current Word: {parts[1].strip()}")
                     elif parts[0] == "ATTEMPTS_LEFT":
-                        print(f"❤️ Attempts Left: {parts[1].strip() if len(parts) > 1 else ''}")
+                        print(f"❤️ Attempts Left: {parts[1].strip()}")
                     elif parts[0] == "PROMPT":
                         guess = input("\n🔡 Guess a letter: ").strip().lower()
                         client_socket.send(f"{guess}\n".encode())
                     elif parts[0] == "STATUS":
-                        # Safely print the status message if it has two parts
-                        print(f"📣 {parts[1].strip() if len(parts) > 1 else message}")
-                        if "Game Over" in message or "Congratulations" in message:
+                        print(f"📣 {parts[1].strip()}")
+                        if "Game Over" in parts[1] or "Congratulations" in parts[1]:
                             return
 
     except KeyboardInterrupt:
