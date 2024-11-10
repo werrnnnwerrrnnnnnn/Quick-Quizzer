@@ -14,7 +14,7 @@ def start_client():
         client_socket.send(f"{mode}\n".encode())
 
         if mode == "math":
-            # Math quiz mode handling
+            # Math quiz mode handling (same as original logic)
             while True:
                 response = client_socket.recv(1024).decode().strip()
                 if not response:
@@ -24,6 +24,7 @@ def start_client():
                 messages = response.split('\n')
                 for message in messages:
                     parts = message.split(':')
+                    # Process server messages as in your math quiz logic
                     if "WELCOME" in message:
                         print("🎉 Welcome to Quick-Quizzer Math Mode! 🎉")
                         level = input("Choose a level to begin the quiz (easy, medium, hard): ").strip().lower()
@@ -59,17 +60,20 @@ def start_client():
                 for message in messages:
                     parts = message.split(':')
 
+                    # Handle Hangman messages
                     if parts[0] == "WELCOME":
+                        # Safely print the welcome message if it has two parts
                         print(parts[1].strip() if len(parts) > 1 else message)
                     elif parts[0] == "WORD":
-                        print(f"Current Word: {parts[1].strip() if len(parts) > 1 else ''}")
+                        print(f"\n🔤 Current Word: {parts[1].strip() if len(parts) > 1 else ''}")
                     elif parts[0] == "ATTEMPTS_LEFT":
-                        print(f"Attempts Left: {parts[1].strip() if len(parts) > 1 else ''}")
+                        print(f"❤️ Attempts Left: {parts[1].strip() if len(parts) > 1 else ''}")
                     elif parts[0] == "PROMPT":
-                        guess = input("Guess a letter: ").strip().lower()
+                        guess = input("\n🔡 Guess a letter: ").strip().lower()
                         client_socket.send(f"{guess}\n".encode())
                     elif parts[0] == "STATUS":
-                        print(parts[1].strip() if len(parts) > 1 else message)
+                        # Safely print the status message if it has two parts
+                        print(f"📣 {parts[1].strip() if len(parts) > 1 else message}")
                         if "Game Over" in message or "Congratulations" in message:
                             return
 
