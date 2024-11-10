@@ -5,6 +5,7 @@ def start_client():
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect(('localhost', 12345))
     print("Connected to the server.")
+    print("============================")  # Add separator line after connection message
     
     try:
         while True:
@@ -40,7 +41,7 @@ def start_client():
                     client_socket.send(answer_message.encode())
                 
                 elif parts[0] == "DASHLINE":
-                    print(parts[1])
+                    print(parts[1])  # Print the dashed line
                 
                 elif parts[0] == "TIMEOUT":
                     print(f"⏰ Time limit: {parts[1]}")
