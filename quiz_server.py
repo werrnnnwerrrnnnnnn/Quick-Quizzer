@@ -6,7 +6,7 @@ import select
 import threading
 from datetime import datetime
 
-# Define questions for different levels
+# Define questions for math quiz
 questions = {
     "easy": {
         1: {"text": "What is 1 + 1?", "answer": "2"},
@@ -32,15 +32,26 @@ def log_message(client_id, message):
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] [Client {client_id}] {message}")
 
 def handle_client(client_socket, client_id):
+    # Initial mode selection
+    mode = client_socket.recv(1024).decode().strip().lower()
+    log_message(client_id, f"Mode selected: {mode}")
+
+    if mode == "math":
+        handle_math_quiz(client_socket, client_id)
+    elif mode == "hangman":
+        handle_hangman(client_socket, client_id)
+    else:
+        client_socket.send("STATUS:400:Invalid Mode Selected. Please restart and choose 'math' or 'hangman'.\n".encode())
+        log_message(client_id, "Invalid mode selected. Disconnecting client.")
+        client_socket.close()
+
+def handle_math_quiz(client_socket, client_id):
     score = 0
     response_times = []
     level = None
 
-    log_message(client_id, "==============================")
-    log_message(client_id, "Connection established")
-
-    # Send engaging welcome message
-    client_socket.send("🎉 WELCOME to the Ultimate Quiz Challenge! 🎉\n".encode())
+    # Send welcome message for math quiz
+    client_socket.send("WELCOME: 🎉 Welcome to Quick-Quizzer Math Mode! 🎉\n".encode())
     client_socket.send("🌟 Choose your adventure level 🌟\n".encode())
     client_socket.send("Type one of the following:\n".encode())
     client_socket.send("  - 🟢 easy : A warm-up for beginners\n".encode())
@@ -49,12 +60,10 @@ def handle_client(client_socket, client_id):
     client_socket.send("\n💡 Need help? Just type 'HELP' for instructions.\n".encode())
     client_socket.send("⏳ Ready to start? Make your choice and let's begin!\n".encode())
 
+    # Wait for level selection
     while not level:
         response = client_socket.recv(1024).decode().strip().lower()
-        if response == "help":
-            client_socket.send("HELP: Available commands - easy, medium, hard, quit\n".encode())
-            log_message(client_id, "Requested help")
-        elif response in questions:
+        if response in questions:
             level = response
             client_socket.send(f"STATUS:200:Level '{level.capitalize()}' Selected 🎉\n".encode())
             client_socket.send("DASHLINE:============================\n".encode())
@@ -68,12 +77,9 @@ def handle_client(client_socket, client_id):
             client_socket.send("STATUS:400:Invalid Level. Type 'HELP' for options.\n".encode())
             log_message(client_id, f"Invalid level input: {response}")
 
-    # Start the timer for the total quiz duration
-    quiz_start_time = time.time()
-
+    # Start quiz
     for q_id, q_data in questions[level].items():
-        log_message(client_id, f"\n----- Question {q_id} -----")
-        log_message(client_id, f"Question: {q_data['text']}")
+        log_message(client_id, f"Question {q_id}: {q_data['text']}")
         
         question_message = f"QUESTION:{q_id}:{q_data['text']}\n"
         client_socket.send(question_message.encode())
@@ -120,18 +126,18 @@ def handle_client(client_socket, client_id):
         log_message(client_id, "------------------------------\n")
         time.sleep(0.1)
 
-    # Calculate total quiz time and average latency
-    quiz_end_time = time.time()
-    total_time = quiz_end_time - quiz_start_time
+    # Send quiz completion stats
+    total_time = sum(response_times)
     average_latency = sum(response_times) / len(response_times) if response_times else 0
-
     client_socket.send("DASHLINE:============================\n".encode())
     client_socket.send(f"STATUS:200:Quiz Complete! 🏁 Final Score: {score}, Average Latency: {average_latency:.2f} seconds, Total Time: {total_time:.2f} seconds\n".encode())
     client_socket.close()
-    
-    # Log final stats
-    log_message(client_id, f"Quiz complete - Final score: {score}, Average Latency: {average_latency:.2f} seconds, Total Time: {total_time:.2f} seconds")
-    log_message(client_id, "==============================\n")
+
+def handle_hangman(client_socket, client_id):
+    # Placeholder for hangman game mode
+    client_socket.send("WELCOME: 🎉 Welcome to Quick-Quizzer Hangman Mode! 🎉\n".encode())
+    client_socket.send("STATUS:200:Hangman game is under development. Please try the math quiz.\n".encode())
+    client_socket.close()
 
 def start_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
