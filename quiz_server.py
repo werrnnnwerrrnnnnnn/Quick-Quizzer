@@ -58,6 +58,9 @@ def handle_client(client_socket, client_id):
             client_socket.send("STATUS:400:Invalid Level. Type 'HELP' for options.\n".encode())
             log_message(client_id, f"Invalid level input: {response}")
 
+    # Start the timer for the total quiz duration
+    quiz_start_time = time.time()
+
     for q_id, q_data in questions[level].items():
         log_message(client_id, f"\n----- Question {q_id} -----")
         log_message(client_id, f"Question: {q_data['text']}")
@@ -107,11 +110,17 @@ def handle_client(client_socket, client_id):
         log_message(client_id, "------------------------------\n")
         time.sleep(0.1)
 
+    # Calculate total quiz time and average latency
+    quiz_end_time = time.time()
+    total_time = quiz_end_time - quiz_start_time
     average_latency = sum(response_times) / len(response_times) if response_times else 0
+
     client_socket.send("DASHLINE:============================\n".encode())
-    client_socket.send(f"STATUS:200:Quiz Complete! 🏁 Final Score: {score}, Average Latency: {average_latency:.2f} seconds\n".encode())
+    client_socket.send(f"STATUS:200:Quiz Complete! 🏁 Final Score: {score}, Average Latency: {average_latency:.2f} seconds, Total Time: {total_time:.2f} seconds\n".encode())
     client_socket.close()
-    log_message(client_id, f"Quiz complete - Final score: {score}, Average Latency: {average_latency:.2f} seconds")
+    
+    # Log final stats
+    log_message(client_id, f"Quiz complete - Final score: {score}, Average Latency: {average_latency:.2f} seconds, Total Time: {total_time:.2f} seconds")
     log_message(client_id, "==============================\n")
 
 def start_server():
