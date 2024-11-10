@@ -1,3 +1,5 @@
+# quiz_server.py
+
 import socket
 import time
 import select
@@ -37,7 +39,15 @@ def handle_client(client_socket, client_id):
     log_message(client_id, "==============================")
     log_message(client_id, "Connection established")
 
-    client_socket.send("WELCOME: Choose a level to begin (easy, medium, hard) or type HELP for options.\n".encode())
+    # Send engaging welcome message
+    client_socket.send("🎉 WELCOME to the Ultimate Quiz Challenge! 🎉\n".encode())
+    client_socket.send("🌟 Choose your adventure level 🌟\n".encode())
+    client_socket.send("Type one of the following:\n".encode())
+    client_socket.send("  - 🟢 easy : A warm-up for beginners\n".encode())
+    client_socket.send("  - 🟡 medium : For those who love a good challenge\n".encode())
+    client_socket.send("  - 🔴 hard : The ultimate test of skill!\n".encode())
+    client_socket.send("\n💡 Need help? Just type 'HELP' for instructions.\n".encode())
+    client_socket.send("⏳ Ready to start? Make your choice and let's begin!\n".encode())
 
     while not level:
         response = client_socket.recv(1024).decode().strip().lower()
