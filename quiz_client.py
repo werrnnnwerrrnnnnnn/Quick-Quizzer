@@ -22,7 +22,7 @@ def start_client():
                 # Process different types of messages from the server
                 if "WELCOME" in message:
                     # Print the welcome message
-                    print("🎉 WELCOME to the Ultimate Quiz Challenge! 🎉")
+                    print("🎉 Welcome to Quick-Quizzer! 🎉")
                     print("🌟 Choose your adventure level 🌟")
                     print("Type one of the following:")
                     print("  - 🟢 easy : A warm-up for beginners")
