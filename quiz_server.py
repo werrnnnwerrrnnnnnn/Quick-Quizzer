@@ -1,10 +1,9 @@
-# quiz_server.py
-
 import socket
 import time
 import select
 import threading
 from datetime import datetime
+import random
 
 # Define questions for math quiz
 questions = {
@@ -24,6 +23,9 @@ questions = {
         3: {"text": "What is 10 + 15 * 2?", "answer": "40"}
     }
 }
+
+# Words for Hangman game
+hangman_words = ["python", "socket", "network", "quiz", "programming"]
 
 TIMEOUT_DURATION = 10  # seconds
 
@@ -134,9 +136,45 @@ def handle_math_quiz(client_socket, client_id):
     client_socket.close()
 
 def handle_hangman(client_socket, client_id):
-    # Placeholder for hangman game mode
+    word = random.choice(hangman_words)
+    guessed_letters = set()
+    attempts_left = 6
+    display_word = "_" * len(word)
+
     client_socket.send("WELCOME: 🎉 Welcome to Quick-Quizzer Hangman Mode! 🎉\n".encode())
-    client_socket.send("STATUS:200:Hangman game is under development. Please try the math quiz.\n".encode())
+    log_message(client_id, f"Starting Hangman with word: {word}")
+
+    while attempts_left > 0 and "_" in display_word:
+        client_socket.send(f"WORD: {' '.join(display_word)}\n".encode())
+        client_socket.send(f"ATTEMPTS_LEFT: {attempts_left}\n".encode())
+        client_socket.send("PROMPT: Guess a letter:\n".encode())
+
+        response = client_socket.recv(1024).decode().strip().lower()
+        if not response or len(response) != 1 or not response.isalpha():
+            client_socket.send("STATUS:400:Invalid input. Please guess a single letter.\n".encode())
+            continue
+
+        if response in guessed_letters:
+            client_socket.send("STATUS:200:Letter already guessed. Try again.\n".encode())
+            continue
+
+        guessed_letters.add(response)
+
+        if response in word:
+            client_socket.send("STATUS:Correct guess! 🎉\n".encode())
+            display_word = "".join([letter if letter in guessed_letters else "_" for letter in word])
+        else:
+            client_socket.send("STATUS:Incorrect guess. ❌\n".encode())
+            attempts_left -= 1
+
+        log_message(client_id, f"Guessed '{response}', Attempts left: {attempts_left}, Word: {display_word}")
+
+    # Send final message based on game outcome
+    if "_" not in display_word:
+        client_socket.send(f"STATUS:Congratulations! You guessed the word '{word}'! 🎉\n".encode())
+    else:
+        client_socket.send(f"STATUS:Game Over! The word was '{word}'. Better luck next time! ❌\n".encode())
+
     client_socket.close()
 
 def start_server():
