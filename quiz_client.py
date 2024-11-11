@@ -9,7 +9,7 @@ def start_client():
     try:
         # Initial mode selection
         print("🎉 Welcome to Quick-Quizzer! 🎉")
-        print("Choose 'math' for a quiz or 'hangman' for hangman.")
+        print("Choose 'math' or 'hangman' mode to begin! 🕹️  [or type 'quit' to exit the game 🥺].")
         mode = input("Choose mode (math/hangman): ").strip().lower()
         client_socket.send(f"{mode}\n".encode())
 
@@ -72,6 +72,12 @@ def start_client():
                         print(f"📣 {parts[1].strip()}")
                         if "Game Over" in parts[1] or "Congratulations" in parts[1]:
                             return
+                        
+        if mode == "quit":
+            response = client_socket.recv(1024).decode().strip()
+            print(f"📣 {response}")
+            print("Exiting... Goodbye!")
+            return  # Exit the function after showing the goodbye message
 
     except KeyboardInterrupt:
         print("\nDisconnected from the server.")

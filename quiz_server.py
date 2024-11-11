@@ -40,8 +40,14 @@ def handle_client(client_socket, client_id):
 
     if mode == "math":
         handle_math_quiz(client_socket, client_id)
+
     elif mode == "hangman":
         handle_hangman(client_socket, client_id)
+
+    elif mode == "quit":
+        client_socket.send("STATUS:411 🏁 Goodbye! Thanks for playing!\n".encode())
+        client_socket.close()
+
     else:
         client_socket.send("STATUS:400 ⚠️ Oops! Wrong Format\n".encode())
         log_message(client_id, "Invalid mode selected. Disconnecting client.")
@@ -71,13 +77,15 @@ def handle_math_quiz(client_socket, client_id):
             client_socket.send("DASHLINE:============================\n".encode())
             log_message(client_id, f"Level selected: {level.capitalize()}")
         elif response == "quit":
-            client_socket.send("STATUS:410 🏁 Game Over - Thanks for Playing!\n".encode())
+            client_socket.send("STATUS:411 🏁 Goodbye! Thanks for playing!\n".encode())
             client_socket.close()
-            log_message(client_id, "Disconnected")
+            log_message(client_id, "Client chose to quit during level selection. Disconnecting client.")
             return
         else:
             client_socket.send("STATUS:400 ⚠️ Oops! Wrong Format\n".encode())
             log_message(client_id, f"Invalid level input: {response}")
+            client_socket.close()
+            return
 
     # Start quiz
     for q_id, q_data in questions[level].items():
@@ -88,21 +96,25 @@ def handle_math_quiz(client_socket, client_id):
         client_socket.send(question_message.encode())
         time.sleep(0.1)
 
-        client_socket.send(f"TIMEOUT:{TIMEOUT_DURATION} seconds\n".encode())
-        log_message(client_id, f"Timeout set for {TIMEOUT_DURATION} seconds")
-
+        # Measure response time
         start_time = time.time()
         ready = select.select([client_socket], [], [], TIMEOUT_DURATION)
+        end_time = time.time()
+        latency = end_time - start_time
+        response_times.append(latency)
 
-        if ready[0]:  # Client responded in time
-            response = client_socket.recv(1024).decode().strip()
-            end_time = time.time()
-            latency = end_time - start_time
-            response_times.append(latency)
-
+        # Check if the client took too long
+        if latency > TIMEOUT_DURATION:
+            client_socket.send("STATUS:408 ⏰ Time’s Up Warning!\n".encode())
+            client_socket.send(f"LATENCY:{latency:.2f} seconds (Exceeded Time Limit)\n".encode())
+            log_message(client_id, f"Response exceeded timeout with latency: {latency:.2f} seconds")
+        else:
             client_socket.send(f"LATENCY:{latency:.2f} seconds\n".encode())
             log_message(client_id, f"Response received in {latency:.2f} seconds")
 
+        # Wait for and process the answer
+        if ready[0]:  # Client responded
+            response = client_socket.recv(1024).decode().strip()
             parts = response.split(':')
             if len(parts) == 3 and parts[0] == "ANSWER" and int(parts[1]) == q_id:
                 client_answer = parts[2].strip().lower()
@@ -123,12 +135,8 @@ def handle_math_quiz(client_socket, client_id):
             else:
                 client_socket.send("STATUS:400 ⚠️ Oops! Wrong Format\n".encode())
                 log_message(client_id, f"Bad request or malformed answer: {response}")
-        else:  # Timeout
-            latency = TIMEOUT_DURATION
-            response_times.append(latency)
-            client_socket.send("STATUS:408 ⏰ Time’s Up!\n".encode())
-            client_socket.send(f"LATENCY:{latency:.2f} seconds (Timed out)\n".encode())
-            log_message(client_id, f"No response - Timeout set latency to {latency} seconds")
+        else:
+            log_message(client_id, "No response from client")
 
         client_socket.send(f"SCORE: Your current score is {score} 🏆\n".encode())
         log_message(client_id, f"Score after question {q_id}: {score}")
