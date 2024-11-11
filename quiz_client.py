@@ -15,6 +15,7 @@ def start_client():
 
         if mode == "math":
             # Math quiz mode handling (same as original logic)
+            question_correctness = {}  # To store correctness per question
             while True:
                 response = client_socket.recv(1024).decode().strip()
                 if not response:
@@ -46,7 +47,21 @@ def start_client():
                         print(f"📣 {message}")
                         if "Quiz Complete" in message:
                             print("\nThank you for playing! 🎉")
-                            return
+                    elif parts[0] == "QUESTION_TIME":
+                        # Display the time per question
+                        question_id = parts[1]
+                        time_taken = parts[2]
+                        print(f"⏱️ Time for Question {question_id}: {time_taken}")
+                    elif parts[0] == "QUESTION_CORRECTNESS":
+                        # Store correctness info to display after time
+                        question_id = parts[1]
+                        correctness = parts[2]
+                        question_correctness[question_id] = correctness
+
+            # After displaying times, show correctness for each question
+            print("\nSummary of Each Question! 📊")
+            for question_id, correctness in question_correctness.items():
+                print(f"📝 Question {question_id}: {correctness}")
 
         elif mode == "hangman":
             # Hangman game handling

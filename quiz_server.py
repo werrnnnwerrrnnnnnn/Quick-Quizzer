@@ -3,6 +3,7 @@ import time
 import threading
 from datetime import datetime
 import random
+import time
 
 # Define questions for math quiz
 questions = {
@@ -100,7 +101,7 @@ def handle_math_quiz(client_socket, client_id):
         
         # Calculate latency and store it
         latency = end_time - start_time
-        response_times.append(latency)
+        response_times.append((q_id, latency))
 
         client_socket.send(f"LATENCY:{latency:.2f} seconds\n".encode())
         log_message(client_id, f"Response received in {latency:.2f} seconds")
@@ -123,6 +124,15 @@ def handle_math_quiz(client_socket, client_id):
             else:
                 client_socket.send("STATUS:404 ❌ Try Again!\n".encode())
                 log_message(client_id, f"Incorrect answer: {client_answer} (Expected: {correct_answer})")
+            
+            if client_answer == correct_answer:
+                correctness = "Correct"
+            else:
+                correctness = "Incorrect"
+
+            client_socket.send(f"QUESTION_CORRECTNESS:{q_id}:{correctness}\n".encode())
+            log_message(client_id, f"Correctness for question {q_id}: {correctness}")
+            
         else:
             client_socket.send("STATUS:400 ⚠️ Oops! Wrong Format\n".encode())
             log_message(client_id, f"Bad request or malformed answer: {response}")
@@ -132,10 +142,16 @@ def handle_math_quiz(client_socket, client_id):
         log_message(client_id, "------------------------------\n")
 
     # Send quiz completion stats
-    total_time = sum(response_times)
+    total_time = sum(latency for _, latency in response_times)
     average_latency = total_time / len(response_times) if response_times else 0
     client_socket.send("DASHLINE:============================\n".encode())
     client_socket.send(f"STATUS:410 🎉 Quiz Complete! Thanks for Playing! 🏆 Final Score: {score}, Average Latency: {average_latency:.2f} seconds, Total Time: {total_time:.2f} seconds\n".encode())
+
+    # Send time taken per question
+    for q_id, latency in response_times:
+        client_socket.send(f"QUESTION_TIME:{q_id}:{latency:.2f} seconds\n".encode())
+        log_message(client_id, f"Time for question {q_id}: {latency:.2f} seconds")
+
     client_socket.close()
 
 def handle_hangman(client_socket, client_id):
