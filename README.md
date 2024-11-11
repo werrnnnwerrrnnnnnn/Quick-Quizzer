@@ -26,22 +26,21 @@ Welcome to **QuickQuizzer** – an interactive terminal quiz game with two modes
    - For **Hangman Mode**: Guess letters to reveal the word. You have limited attempts, so choose wisely!
 4. **Score and Feedback**: Earn points for correct answers or guesses. Get instant feedback on each response, including your current score and response time.
 5. **Completion**: Once the game ends, see your final score, average response time, and summary. Enjoy the positive feedback and celebrate your achievement!
-Enjoy the quiz, and good luck! 🧠✨
+6. Enjoy the quiz, and good luck! 🧠✨
 <!-- ------------------------------------------------------- -->
 ### 📍 Math Quiz Mode - Custom Protocol
 
 | Status Code | Phrase                            | Description                                                                                       |
 |-------------|-----------------------------------|---------------------------------------------------------------------------------------------------|
-| 100 🎉      | You’ve Got This!                  | Response when a level is selected, encouraging the player.                                        |
+| 100 🙌🏻      | You’ve Got This!                  | Response when a level is selected, encouraging the player.                                        |
 | 101 📊      | Score Updated                     | Sent after each answer to update the player's score.                                              |
-| 200 👏      | Nailed It!                        | Sent for a correct answer.                                                                        |
-| 202 ✅      | Answer Received                   | General response for any answer received, whether correct or incorrect.                           |
+| 200 👏🏻      | Nailed It!                        | Sent for a correct answer.                                                                        |
 | 300 💡      | Question Incoming                 | Sent before sending each new question.                                                            |
 | 400 ⚠️       | Oops! Wrong Format                | For unexpected characters (e.g., letters when a number is expected).                              |
-| 401 🚫      | No Cheating! Only Numbers Allowed!| For alphabetic characters in numeric-only answers.                                                |
+| 401 🚫      | Only Numbers Allowed!             | For alphabetic characters in numeric-only answers.                                                |
 | 404 ❌      | Try Again!                        | For incorrect answers.                                                                            |
-| 410 🏁      | Quiz Complete! Thanks for Playing!| Sent after the last question is answered or the quiz ends.                                        |
-| 411 🏁      | Goodbye! Thanks for playing!      | Sent after the user type 'quit' to end the game.                                                  |
+| 410 🎉      | Quiz Complete! Thanks for Playing!| Sent after the last question is answered or the quiz ends.                                        |
+| 411 👋🏻      | Goodbye! Thanks for playing!      | Sent after the user type 'quit' to end the game.                                                  |
 
 <!-- ------------------------------------------------------- -->
 ### 📍 Hangman Mode - Custom Protocol
@@ -49,11 +48,10 @@ Enjoy the quiz, and good luck! 🧠✨
 | Status Code | Phrase                            | Description                                                                                       |
 |-------------|-----------------------------------|---------------------------------------------------------------------------------------------------|
 | 100 👀      | Ready, Set, Guess!                | Initial message when the game starts.                                                             |
-| 200 👍      | Nice Choice!                      | For a correct guess.                                                                              |
-| 201 ❌      | Nope, Try Again                   | For an incorrect guess.                                                                           |
-| 202 😬      | Already Tried That!               | When a letter has already been guessed.                                                           |
-| 400 👎      | No Digits Allowed                 | When a number is entered instead of a letter.                                                     |
-| 401 🚫      | Special Characters Not Allowed    | For special character inputs.                                                                     |
-| 404 🛑      | Wrong Guess                       | For an incorrect guess.                                                                           |
-| 410 🎉      | You Win! The Word Was ""          | For completing the word successfully.                                                             |
-| 411 😞      | Game Over - Word Was ""           | For exhausting all attempts without guessing the word.                                            |
+| 200 👍🏻      | Nice Choice!                      | For a correct guess.                                                                              |
+| 202 🙂‍↔️      | Already Tried That!               | When a letter has already been guessed.                                                           |
+| 400 🚫      | No Digits Allowed                 | When a number is entered instead of a letter.                                                     |
+| 401 ❗️      | Special Characters Not Allowed    | For special character inputs.                                                                     |
+| 404 ❌      | Wrong Guess                       | For an incorrect guess.                                                                           |
+| 410 🎉      | You Win! The Word Was "..."       | For completing the word successfully.                                                             |
+| 411 😞      | Game Over - The Word Was "..."    | For exhausting all attempts without guessing the word.                                            |

@@ -44,7 +44,7 @@ def handle_client(client_socket, client_id):
         handle_hangman(client_socket, client_id)
 
     elif mode == "quit":
-        client_socket.send("STATUS:411 🏁 Goodbye! Thanks for playing!\n".encode())
+        client_socket.send("STATUS:411 👋🏻  Goodbye! Thanks for playing!\n".encode())
         client_socket.close()
 
     else:
@@ -58,7 +58,7 @@ def handle_math_quiz(client_socket, client_id):
     level = None
 
     # Send welcome message for math quiz
-    client_socket.send("WELCOME:100 🎉 You’ve Got This!\n".encode())
+    client_socket.send("WELCOME:100 🙌🏻 You’ve Got This!\n".encode())
     client_socket.send("🌟 Choose your adventure level 🌟\n".encode())
     client_socket.send("Type one of the following:\n".encode())
     client_socket.send("  - 🟢 easy : A warm-up for beginners\n".encode())
@@ -76,7 +76,7 @@ def handle_math_quiz(client_socket, client_id):
             client_socket.send("DASHLINE:============================\n".encode())
             log_message(client_id, f"Level selected: {level.capitalize()}")
         elif response == "quit":
-            client_socket.send("STATUS:411 🏁 Goodbye! Thanks for playing!\n".encode())
+            client_socket.send("STATUS:411 👋🏻 Goodbye! Thanks for playing!\n".encode())
             client_socket.close()
             log_message(client_id, "Client chose to quit during level selection. Disconnecting client.")
             return
@@ -114,11 +114,11 @@ def handle_math_quiz(client_socket, client_id):
             
             # Check if the answer is numeric
             if not client_answer.isdigit():
-                client_socket.send("STATUS:401 🚫 No Cheating! Only Numbers Allowed!\n".encode())
+                client_socket.send("STATUS:401 🚫 Only Numbers Allowed!\n".encode())
                 log_message(client_id, f"Non-numeric answer received: {client_answer}")
             elif client_answer == correct_answer:
                 score += 1
-                client_socket.send("STATUS:200 👏 Nailed It!\n".encode())
+                client_socket.send("STATUS:200 👏🏻 Nailed It!\n".encode())
                 client_socket.send("STATUS:101 📊 Score Updated\n".encode())
                 log_message(client_id, f"Correct answer: {client_answer}")
             else:
@@ -171,15 +171,15 @@ def handle_hangman(client_socket, client_id):
         response = client_socket.recv(1024).decode().strip().lower()
         if not response or len(response) != 1 or not response.isalpha():
             if response.isdigit():
-                client_socket.send("STATUS:400 👎 No Digits Allowed\n".encode())
+                client_socket.send("STATUS:400 🚫 No Digits Allowed\n".encode())
             elif not response.isalnum():
-                client_socket.send("STATUS:401 🚫 Special Characters Not Allowed\n".encode())
+                client_socket.send("STATUS:401 ❗️ Special Characters Not Allowed\n".encode())
             else:
                 client_socket.send("STATUS:400 ⚠️ Oops! Wrong Format\n".encode())
             continue
 
         if response in guessed_letters:
-            client_socket.send("STATUS:202 😬 Already Tried That!\n".encode())
+            client_socket.send("STATUS:202 🙂‍↔️ Already Tried That!\n".encode())
             continue
 
         guessed_letters.add(response)
@@ -187,11 +187,11 @@ def handle_hangman(client_socket, client_id):
         if response in word:
             display_word = "".join([letter if letter in guessed_letters else "_" for letter in word])
             if "_" not in display_word:
-                client_socket.send(f"STATUS:410 🎉 You Win! The Word Was '{word}'\n".encode())
+                client_socket.send(f"STATUS:410 🎉 You Win! - The Word Was '{word}'\n".encode())
                 log_message(client_id, "Player successfully guessed the word.")
                 break
             else:
-                client_socket.send("STATUS:200 👍 Nice Choice!\n".encode())
+                client_socket.send("STATUS:200 👍🏻 Nice Choice!\n".encode())
         else:
             client_socket.send("STATUS:404 ❌ Wrong Guess\n".encode())
             attempts_left -= 1
@@ -199,7 +199,7 @@ def handle_hangman(client_socket, client_id):
         log_message(client_id, f"Guessed '{response}', Attempts left: {attempts_left}, Word: {display_word}")
 
     if "_" in display_word:
-        client_socket.send(f"STATUS:411 😞 Game Over - Word Was '{word}'\n".encode())
+        client_socket.send(f"STATUS:411 😞 Game Over - The Word Was '{word}'\n".encode())
         log_message(client_id, "Game over. Player failed to guess the word.")
 
     client_socket.close()
