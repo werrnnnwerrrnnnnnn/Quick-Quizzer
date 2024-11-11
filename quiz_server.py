@@ -1,6 +1,5 @@
 import socket
 import time
-import select
 import threading
 from datetime import datetime
 import random
@@ -27,7 +26,6 @@ questions = {
 # Words for Hangman game
 hangman_words = ["python", "socket", "network", "quiz", "programming"]
 
-TIMEOUT_DURATION = 10  # seconds
 
 def log_message(client_id, message):
     """Helper function to print log messages with timestamp and client ID."""
@@ -94,58 +92,48 @@ def handle_math_quiz(client_socket, client_id):
         question_message = f"QUESTION:{q_id}:{q_data['text']}\n"
         client_socket.send("STATUS:300 💡 Question Incoming\n".encode())
         client_socket.send(question_message.encode())
-        time.sleep(0.1)
 
         # Measure response time
         start_time = time.time()
-        ready = select.select([client_socket], [], [], TIMEOUT_DURATION)
+        response = client_socket.recv(1024).decode().strip()
         end_time = time.time()
+        
+        # Calculate latency and store it
         latency = end_time - start_time
         response_times.append(latency)
 
-        # Check if the client took too long
-        if latency > TIMEOUT_DURATION:
-            client_socket.send("STATUS:408 ⏰ Time’s Up Warning!\n".encode())
-            client_socket.send(f"LATENCY:{latency:.2f} seconds (Exceeded Time Limit)\n".encode())
-            log_message(client_id, f"Response exceeded timeout with latency: {latency:.2f} seconds")
-        else:
-            client_socket.send(f"LATENCY:{latency:.2f} seconds\n".encode())
-            log_message(client_id, f"Response received in {latency:.2f} seconds")
+        client_socket.send(f"LATENCY:{latency:.2f} seconds\n".encode())
+        log_message(client_id, f"Response received in {latency:.2f} seconds")
 
-        # Wait for and process the answer
-        if ready[0]:  # Client responded
-            response = client_socket.recv(1024).decode().strip()
-            parts = response.split(':')
-            if len(parts) == 3 and parts[0] == "ANSWER" and int(parts[1]) == q_id:
-                client_answer = parts[2].strip().lower()
-                correct_answer = q_data["answer"].strip().lower()
-                
-                # Check if the answer is numeric
-                if not client_answer.isdigit():
-                    client_socket.send("STATUS:401 🚫 No Cheating! Only Numbers Allowed!\n".encode())
-                    log_message(client_id, f"Non-numeric answer received: {client_answer}")
-                elif client_answer == correct_answer:
-                    score += 1
-                    client_socket.send("STATUS:200 👏 Nailed It!\n".encode())
-                    client_socket.send("STATUS:101 📊 Score Updated\n".encode())
-                    log_message(client_id, f"Correct answer: {client_answer}")
-                else:
-                    client_socket.send("STATUS:404 ❌ Try Again!\n".encode())
-                    log_message(client_id, f"Incorrect answer: {client_answer} (Expected: {correct_answer})")
+        # Process the answer
+        parts = response.split(':')
+        if len(parts) == 3 and parts[0] == "ANSWER" and int(parts[1]) == q_id:
+            client_answer = parts[2].strip().lower()
+            correct_answer = q_data["answer"].strip().lower()
+            
+            # Check if the answer is numeric
+            if not client_answer.isdigit():
+                client_socket.send("STATUS:401 🚫 No Cheating! Only Numbers Allowed!\n".encode())
+                log_message(client_id, f"Non-numeric answer received: {client_answer}")
+            elif client_answer == correct_answer:
+                score += 1
+                client_socket.send("STATUS:200 👏 Nailed It!\n".encode())
+                client_socket.send("STATUS:101 📊 Score Updated\n".encode())
+                log_message(client_id, f"Correct answer: {client_answer}")
             else:
-                client_socket.send("STATUS:400 ⚠️ Oops! Wrong Format\n".encode())
-                log_message(client_id, f"Bad request or malformed answer: {response}")
+                client_socket.send("STATUS:404 ❌ Try Again!\n".encode())
+                log_message(client_id, f"Incorrect answer: {client_answer} (Expected: {correct_answer})")
         else:
-            log_message(client_id, "No response from client")
+            client_socket.send("STATUS:400 ⚠️ Oops! Wrong Format\n".encode())
+            log_message(client_id, f"Bad request or malformed answer: {response}")
 
         client_socket.send(f"SCORE: Your current score is {score} 🏆\n".encode())
         log_message(client_id, f"Score after question {q_id}: {score}")
         log_message(client_id, "------------------------------\n")
-        time.sleep(0.1)
 
     # Send quiz completion stats
     total_time = sum(response_times)
-    average_latency = sum(response_times) / len(response_times) if response_times else 0
+    average_latency = total_time / len(response_times) if response_times else 0
     client_socket.send("DASHLINE:============================\n".encode())
     client_socket.send(f"STATUS:410 🎉 Quiz Complete! Thanks for Playing! 🏆 Final Score: {score}, Average Latency: {average_latency:.2f} seconds, Total Time: {total_time:.2f} seconds\n".encode())
     client_socket.close()
