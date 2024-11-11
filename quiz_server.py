@@ -107,7 +107,12 @@ def handle_math_quiz(client_socket, client_id):
             if len(parts) == 3 and parts[0] == "ANSWER" and int(parts[1]) == q_id:
                 client_answer = parts[2].strip().lower()
                 correct_answer = q_data["answer"].strip().lower()
-                if client_answer == correct_answer:
+                
+                # Check if the answer is numeric
+                if not client_answer.isdigit():
+                    client_socket.send("STATUS:401 🚫 No Cheating! Only Numbers Allowed!\n".encode())
+                    log_message(client_id, f"Non-numeric answer received: {client_answer}")
+                elif client_answer == correct_answer:
                     score += 1
                     client_socket.send("STATUS:200 👏 Nailed It!\n".encode())
                     client_socket.send("STATUS:101 📊 Score Updated\n".encode())
