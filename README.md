@@ -40,7 +40,6 @@ Enjoy the quiz, and good luck! 🧠✨
 | 400 ⚠️       | Oops! Wrong Format                | For unexpected characters (e.g., letters when a number is expected).                              |
 | 401 🚫      | No Cheating! Only Numbers Allowed!| For alphabetic characters in numeric-only answers.                                                |
 | 404 ❌      | Try Again!                        | For incorrect answers.                                                                            |
-| 408 ⏰      | Time’s Up!                        | For answers submitted after the timeout.                                                          |
 | 410 🏁      | Quiz Complete! Thanks for Playing!| Sent after the last question is answered or the quiz ends.                                        |
 | 411 🏁      | Goodbye! Thanks for playing!      | Sent after the user type 'quit' to end the game.                                                  |
 
