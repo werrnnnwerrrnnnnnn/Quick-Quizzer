@@ -43,7 +43,7 @@ def handle_client(client_socket, client_id):
     elif mode == "hangman":
         handle_hangman(client_socket, client_id)
     else:
-        client_socket.send("STATUS:400:Invalid Mode Selected. Please restart and choose 'math' or 'hangman'.\n".encode())
+        client_socket.send("STATUS:400 ⚠️ Oops! Wrong Format\n".encode())
         log_message(client_id, "Invalid mode selected. Disconnecting client.")
         client_socket.close()
 
@@ -53,7 +53,7 @@ def handle_math_quiz(client_socket, client_id):
     level = None
 
     # Send welcome message for math quiz
-    client_socket.send("WELCOME: 🎉 Welcome to Quick-Quizzer Math Mode! 🎉\n".encode())
+    client_socket.send("WELCOME:100 🎉 You’ve Got This!\n".encode())
     client_socket.send("🌟 Choose your adventure level 🌟\n".encode())
     client_socket.send("Type one of the following:\n".encode())
     client_socket.send("  - 🟢 easy : A warm-up for beginners\n".encode())
@@ -67,16 +67,16 @@ def handle_math_quiz(client_socket, client_id):
         response = client_socket.recv(1024).decode().strip().lower()
         if response in questions:
             level = response
-            client_socket.send(f"STATUS:200:Level '{level.capitalize()}' Selected 🎉\n".encode())
+            client_socket.send(f"STATUS:100 🎉 Level '{level.capitalize()}' Selected!\n".encode())
             client_socket.send("DASHLINE:============================\n".encode())
             log_message(client_id, f"Level selected: {level.capitalize()}")
         elif response == "quit":
-            client_socket.send("STATUS:200:Disconnected\n".encode())
+            client_socket.send("STATUS:410 🏁 Game Over - Thanks for Playing!\n".encode())
             client_socket.close()
             log_message(client_id, "Disconnected")
             return
         else:
-            client_socket.send("STATUS:400:Invalid Level. Type 'HELP' for options.\n".encode())
+            client_socket.send("STATUS:400 ⚠️ Oops! Wrong Format\n".encode())
             log_message(client_id, f"Invalid level input: {response}")
 
     # Start quiz
@@ -84,6 +84,7 @@ def handle_math_quiz(client_socket, client_id):
         log_message(client_id, f"Question {q_id}: {q_data['text']}")
         
         question_message = f"QUESTION:{q_id}:{q_data['text']}\n"
+        client_socket.send("STATUS:300 💡 Question Incoming\n".encode())
         client_socket.send(question_message.encode())
         time.sleep(0.1)
 
@@ -108,18 +109,19 @@ def handle_math_quiz(client_socket, client_id):
                 correct_answer = q_data["answer"].strip().lower()
                 if client_answer == correct_answer:
                     score += 1
-                    client_socket.send("STATUS:200:Correct! 🎉\n".encode())
+                    client_socket.send("STATUS:200 👏 Nailed It!\n".encode())
+                    client_socket.send("STATUS:101 📊 Score Updated\n".encode())
                     log_message(client_id, f"Correct answer: {client_answer}")
                 else:
-                    client_socket.send("STATUS:200:Incorrect ❌\n".encode())
+                    client_socket.send("STATUS:404 ❌ Try Again!\n".encode())
                     log_message(client_id, f"Incorrect answer: {client_answer} (Expected: {correct_answer})")
             else:
-                client_socket.send("STATUS:400:Bad Request\n".encode())
+                client_socket.send("STATUS:400 ⚠️ Oops! Wrong Format\n".encode())
                 log_message(client_id, f"Bad request or malformed answer: {response}")
         else:  # Timeout
             latency = TIMEOUT_DURATION
             response_times.append(latency)
-            client_socket.send("STATUS:408:Timeout ❌\n".encode())
+            client_socket.send("STATUS:408 ⏰ Time’s Up!\n".encode())
             client_socket.send(f"LATENCY:{latency:.2f} seconds (Timed out)\n".encode())
             log_message(client_id, f"No response - Timeout set latency to {latency} seconds")
 
@@ -132,7 +134,7 @@ def handle_math_quiz(client_socket, client_id):
     total_time = sum(response_times)
     average_latency = sum(response_times) / len(response_times) if response_times else 0
     client_socket.send("DASHLINE:============================\n".encode())
-    client_socket.send(f"STATUS:200:Quiz Complete! 🏁 Final Score: {score}, Average Latency: {average_latency:.2f} seconds, Total Time: {total_time:.2f} seconds\n".encode())
+    client_socket.send(f"STATUS:410 🎉 Quiz Complete! Thanks for Playing! 🏆 Final Score: {score}, Average Latency: {average_latency:.2f} seconds, Total Time: {total_time:.2f} seconds\n".encode())
     client_socket.close()
 
 def handle_hangman(client_socket, client_id):
@@ -141,7 +143,7 @@ def handle_hangman(client_socket, client_id):
     attempts_left = 6
     display_word = "_" * len(word)
 
-    client_socket.send("WELCOME: 🎉 Welcome to Quick-Quizzer Hangman Mode! 🎉\n".encode())
+    client_socket.send("WELCOME:100 👀 Ready, Set, Guess!\n".encode())
     log_message(client_id, f"Starting Hangman with word: {word}")
 
     while attempts_left > 0 and "_" in display_word:
@@ -152,15 +154,15 @@ def handle_hangman(client_socket, client_id):
         response = client_socket.recv(1024).decode().strip().lower()
         if not response or len(response) != 1 or not response.isalpha():
             if response.isdigit():
-                client_socket.send("STATUS:400 Bad Request: Invalid Character - Number Detected\n".encode())
+                client_socket.send("STATUS:400 👎 No Digits Allowed\n".encode())
             elif not response.isalnum():
-                client_socket.send("STATUS:400 Bad Request: Invalid Character - Special Character Detected\n".encode())
+                client_socket.send("STATUS:401 🚫 Special Characters Not Allowed\n".encode())
             else:
-                client_socket.send("STATUS:400 Bad Request: Invalid Input\n".encode())
+                client_socket.send("STATUS:400 ⚠️ Oops! Wrong Format\n".encode())
             continue
 
         if response in guessed_letters:
-            client_socket.send("STATUS:409:Conflict - Letter already guessed. Try again.\n".encode())
+            client_socket.send("STATUS:202 😬 Already Tried That!\n".encode())
             continue
 
         guessed_letters.add(response)
@@ -168,36 +170,42 @@ def handle_hangman(client_socket, client_id):
         if response in word:
             display_word = "".join([letter if letter in guessed_letters else "_" for letter in word])
             if "_" not in display_word:
-                client_socket.send(f"STATUS:200 OK: Congratulations! You guessed the word '{word}'! 🎉\n".encode())
+                client_socket.send(f"STATUS:410 🎉 You Win! The Word Was '{word}'\n".encode())
                 log_message(client_id, "Player successfully guessed the word.")
                 break
             else:
-                client_socket.send("STATUS:200 OK - Correct guess! 🎉\n".encode())
+                client_socket.send("STATUS:200 👍 Nice Choice!\n".encode())
         else:
-            client_socket.send("STATUS:404 Not Found: Wrong Guess ❌\n".encode())
+            client_socket.send("STATUS:404 ❌ Wrong Guess\n".encode())
             attempts_left -= 1
 
         log_message(client_id, f"Guessed '{response}', Attempts left: {attempts_left}, Word: {display_word}")
 
     if "_" in display_word:
-        client_socket.send(f"STATUS:404:Game Over - The word was '{word}'. Better luck next time! ❌\n".encode())
+        client_socket.send(f"STATUS:411 😞 Game Over - Word Was '{word}'\n".encode())
         log_message(client_id, "Game over. Player failed to guess the word.")
 
     client_socket.close()
 
 def start_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  # Allows immediate reuse of the address
     server_socket.bind(('localhost', 12345))
     server_socket.listen(5)
     print("Server is listening on port 12345...\n")
     
-    while True:
-        client_socket, addr = server_socket.accept()
-        client_id = addr[1]  # Use port number as unique identifier
-        log_message(client_id, f"Connected to {addr}")
+    try:
+        while True:
+            client_socket, addr = server_socket.accept()
+            client_id = addr[1]  # Use port number as unique identifier
+            log_message(client_id, f"Connected to {addr}")
 
-        client_thread = threading.Thread(target=handle_client, args=(client_socket, client_id))
-        client_thread.start()
+            client_thread = threading.Thread(target=handle_client, args=(client_socket, client_id))
+            client_thread.start()
+    except KeyboardInterrupt:
+        print("\nServer shutting down.")
+    finally:
+        server_socket.close()
 
 if __name__ == "__main__":
     start_server()
