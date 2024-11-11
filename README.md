@@ -35,27 +35,24 @@ Enjoy the quiz, and good luck! 🧠✨
 | 100 🎉      | You’ve Got This!                  | Response when a level is selected, encouraging the player.                                        |
 | 101 📊      | Score Updated                     | Sent after each answer to update the player's score.                                              |
 | 200 👏      | Nailed It!                        | Sent for a correct answer.                                                                        |
-| 201 ⏱️      | Quick Thinker!                    | When the answer is correct and within the timeout period.                                         |
 | 202 ✅      | Answer Received                   | General response for any answer received, whether correct or incorrect.                           |
-| 203 🐢      | Speed Up!                         | For answers received but slower than average.                                                     |
 | 300 💡      | Question Incoming                 | Sent before sending each new question.                                                            |
-| 400 ⚠️      | Oops! Wrong Format                | For unexpected characters (e.g., letters when a number is expected).                              |
-| 401 🚫      | No Cheating! Only Numbers Allowed! | For alphabetic characters in numeric-only answers.                                                |
+| 400 ⚠️       | Oops! Wrong Format                | For unexpected characters (e.g., letters when a number is expected).                              |
+| 401 🚫      | No Cheating! Only Numbers Allowed!| For alphabetic characters in numeric-only answers.                                                |
 | 404 ❌      | Try Again!                        | For incorrect answers.                                                                            |
 | 408 ⏰      | Time’s Up!                        | For answers submitted after the timeout.                                                          |
-| 410 🏁      | Quiz Complete! Thanks for Playing! | Sent after the last question is answered or the quiz ends.                                        |
+| 410 🏁      | Quiz Complete! Thanks for Playing!| Sent after the last question is answered or the quiz ends.                                        |
+| 411 🏁      | Goodbye! Thanks for playing!      | Sent after the user type 'quit' to end the game.                                                  |
 
 <!-- ------------------------------------------------------- -->
 ### 📍 Hangman Mode - Custom Protocol
 
 | Status Code | Phrase                            | Description                                                                                       |
 |-------------|-----------------------------------|---------------------------------------------------------------------------------------------------|
-| 100 👀      | Ready, Set, Guess!               | Initial message when the game starts.                                                             |
+| 100 👀      | Ready, Set, Guess!                | Initial message when the game starts.                                                             |
 | 200 👍      | Nice Choice!                      | For a correct guess.                                                                              |
 | 201 ❌      | Nope, Try Again                   | For an incorrect guess.                                                                           |
 | 202 😬      | Already Tried That!               | When a letter has already been guessed.                                                           |
-| 203 🐾      | Guess Registered                  | General response for a received guess.                                                            |
-| 300 🔍      | Hint Unlocked!                    | Optional: Sent when the server decides to offer a hint.                                           |
 | 400 👎      | No Digits Allowed                 | When a number is entered instead of a letter.                                                     |
 | 401 🚫      | Special Characters Not Allowed    | For special character inputs.                                                                     |
 | 404 🛑      | Wrong Guess                       | For an incorrect guess.                                                                           |
