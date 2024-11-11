@@ -11,20 +11,20 @@ Welcome to **QuickQuizzer** – an interactive terminal quiz game with two modes
 - Python 3.x installed on your machine
 - A terminal to run the server and clien
 
-### 📍 Start the Game
+### 📍 Start the Game in Terminal
 - Step 1: Start the Server
-    - Navigate to the directory where `quiz_server.py` is located, and run: ```python3 quiz_server.py```
-    - You should see: ``` Server is listening on port 12345... ```
+    - Navigate to the directory where **quiz_server.py** is located, and run: `python3 quiz_server.py`
+    - You should see: `Server is listening on port 12345...`
 
 - Step 2: Start the Client
-    - Navigate to the same directory, and run: ```python3 quiz_client.py```
-    - You should see: ```Type 'start' to begin the quiz:```
+    - Navigate to the directory where **quiz_client.py** is located, and run: `python3 quiz_client.py`
+    - You should see: `Type 'start' to begin the quiz:`
     - Type `start` and hit Enter to begin the quiz!
 
-### 📍 Important Notes
-- Run server first, then connect with the client.
-- Ensure server and client are on the same network.
-- Use the exact command format for answers, or you may get a "Bad Request" error.
+- Important Notes
+    - Run server first, then connect with the client.
+    - Ensure server and client are on the same network.
+    - Use the exact command format for answers, or you may get a "Bad Request" error.
 
 Enjoy the quiz, and good luck! 🧠✨
 
