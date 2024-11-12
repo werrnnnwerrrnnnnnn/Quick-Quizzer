@@ -1,0 +1,136 @@
+\documentclass[12pt]{article}
+\usepackage{tabularx}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+
+\title{QuickQuizzer - Project Documentation}
+\author{Tatiya Seehatrakul st124875}
+\date{November, 2024}
+
+\begin{document}
+
+\maketitle
+
+\section{Project Objectives}
+The objective of this project is to create an interactive terminal-based quiz game application, QuickQuizzer, which supports two game modes: \textbf{Math Quiz} and \textbf{Hangman}. The application is designed to:
+\begin{itemize}
+    \item Provide a fun, educational experience with real-time feedback for players.
+    \item Allow users to choose between two distinct game modes, each with unique challenges.
+    \item Measure user response time and accuracy in answering math questions or guessing letters.
+    \item Provide a user-friendly interface with clear instructions and positive feedback for correct actions.
+\end{itemize}
+
+This application uses the \textbf{TCP} transport layer for reliable data transfer between the client and server. TCP ensures that each message (question, answer, score, etc.) is delivered in the correct order and without loss, which is essential for maintaining the flow of the quiz game. This reliability is critical for games where players expect accurate and sequential interaction with the server.
+
+\newpage
+\section{Application-Layer Protocol Design}
+The application-layer protocol is custom-designed for QuickQuizzer to handle communication between the client and server. It includes a set of request and response actions that manage user mode selection, question handling, answer evaluation, and score tracking. 
+
+\subsection{Math Quiz Mode - Custom Protocol}
+\begin{tabularx}{\textwidth}{|c|l|X|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Status Code}} & \multicolumn{1}{c|}{\textbf{Status Phrase}} & \multicolumn{1}{c|}{\textbf{Description}} \\
+\hline
+100 & You've Got This! & Response when a level is selected, encouraging the player. \\
+\hline
+101 & Score Updated & Sent after each answer to update the player's score. \\
+\hline
+200 & Nailed It! & Sent for a correct answer. \\
+\hline
+300 & Question Incoming & Sent before sending each new question. \\
+\hline
+400 & Oops! Wrong Format & For unexpected characters (e.g., letters when a number is expected). \\
+\hline
+401 & Only Numbers Allowed! & For alphabetic characters in numeric-only answers. \\
+\hline
+404 & Try Again! & For incorrect answers. \\
+\hline
+410 & Quiz Complete! Thanks for Playing! & Sent after the last question is answered or the quiz ends. \\
+\hline
+411 & Goodbye! Thanks for playing! & Sent when the user exits the game. \\
+\hline
+\end{tabularx}
+
+\subsection{Hangman Mode - Custom Protocol}
+\begin{tabularx}{\textwidth}{|c|l|X|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Status Code}} & \multicolumn{1}{c|}{\textbf{Status Phrase}} & \multicolumn{1}{c|}{\textbf{Description}} \\
+\hline
+100 & Ready, Set, Guess! & Initial message when the game starts. \\
+\hline
+200 & Nice Choice! & For a correct guess. \\
+\hline
+202 & Already Tried That! & When a letter has already been guessed. \\
+\hline
+400 & No Digits Allowed & When a number is entered instead of a letter. \\
+\hline
+401 & Special Characters Not Allowed & For special character inputs. \\
+\hline
+404 & Wrong Guess & For an incorrect guess. \\
+\hline
+410 & You Win! The Word Was ``...'' & For completing the word successfully. \\
+\hline
+411 & Game Over - The Word Was ``...'' & For exhausting all attempts without guessing the word. \\
+\hline
+\end{tabularx}
+
+\newpage
+\section{Implementation and Code Flow}
+The QuickQuizzer game consists of two main Python scripts: \texttt{quiz\_server.py} and \texttt{quiz\_client.py}.
+
+\subsection{Server Code Overview}
+The server:
+\begin{itemize}
+    \item Listens for incoming connections from clients.
+    \item Prompts the client to select a mode:``math'' for Math Quiz mode or ``hangman'' for Hangman mode.
+    \item Based on the selected mode, either starts the Math Quiz or Hangman game by sending relevant instructions and questions to the client.
+    \item For Math Quiz, the server sends a series of math questions and evaluates each answer, providing feedback on accuracy and tracking the player's score and response time.
+    \item For Hangman, the server randomly selects a word and interacts with the client as they guess letters, keeping track of attempts left and displaying partial progress.
+    \item Upon completion or exit, sends a summary and final score, then closes the connection.
+\end{itemize}
+
+\subsection{Client Code Overview}
+The client:
+\begin{itemize}
+    \item Connects to the server and selects a game mode.
+    \item Receives instructions and questions, then interacts with the server by sending answers or guesses.
+    \item Receives feedback on each response, including scores, time taken per question, and whether the answer was correct.
+    \item At the end of the game, displays a summary with the final score and exits the connection.
+\end{itemize}
+
+\newpage
+\section{Example Code Explanation}
+Below is a simple breakdown of key code segments from the client and server files:
+
+\begin{verbatim}
+# Server code segment to handle client connection
+def handle_client(client_socket, client_id):
+    mode = client_socket.recv(1024).decode().strip().lower()
+    if mode == "math":
+        handle_math_quiz(client_socket, client_id)
+    elif mode == "hangman":
+        handle_hangman(client_socket, client_id)
+    elif mode == "quit":
+        client_socket.send("STATUS:411 Goodbye! Thanks for playing!\n".encode())
+        client_socket.close()
+    else:
+        client_socket.send("STATUS:400 Oops! Wrong Format\n".encode())
+        client_socket.close()
+
+# Client code segment to start interaction
+mode = input("Choose mode (math/hangman): ").strip().lower()
+client_socket.send(f"{mode}\n".encode())
+\end{verbatim}
+
+\section{Transport Layer Choice: TCP}
+This project uses the \textbf{TCP} protocol because:
+\begin{itemize}
+    \item \textbf{Reliability}: TCP ensures that each message is delivered accurately and in the correct sequence, which is essential for a game where questions must appear in order and each response needs to be acknowledged.
+    \item \textbf{Error-checking and Retransmission}: TCP provides error-checking and retransmission, which helps in maintaining a smooth and uninterrupted game experience, as opposed to UDP, where packet loss could interrupt gameplay.
+    \item \textbf{Connection-oriented Communication}: The game requires a constant connection between client and server to facilitate interactive gameplay, which TCP effectively supports.
+\end{itemize}
+
+\section{Conclusion}
+The QuickQuizzer project successfully demonstrates a network application using custom protocols over a TCP connection. This project highlights key concepts in socket programming, including real-time communication, protocol design, and client-server interaction, making it an engaging and educational experience for players.
+
+\end{document}
