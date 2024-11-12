@@ -1,11 +1,16 @@
-# QuickQuizzer 🎉
-Welcome to **QuickQuizzer** – an interactive terminal quiz game with two modes: **Math Quiz** and **Hangman**!
+# QuickQuizzer 
+- **By : Tatiya Seehatrakul st124875**
+- This project is developed to fulfill the requirements of the AT70.05 Computer Networks course at the Asian Institute of Technology (AIT) for the August 2024 semester.
+
+## 📍 Welcome to QuickQuizzer
+**QuickQuizzer** – an interactive terminal quiz game with two modes: **Math Quiz** and **Hangman** 🚀  Built with a custom protocol over TCP sockets, QuickQuizzer ensures reliable, real-time communication between the client and server. With easy-to-understand status codes, it keeps gameplay smooth, updates scores quickly, and gives instant feedback to keep you engaged. Enjoy the game! 🕹️ 🙌🏻 ✨
+
 <!-- ------------------------------------------------------- -->
-### 📍 Requirements 
+## 📍 Requirements 
 - Python 3.x installed on your machine
 - A terminal to run the server and client
 <!-- ------------------------------------------------------- -->
-### 📍 Start the Game in Terminal
+## 📍 Start the Game in Terminal
 - Step 1: Start the Server
     - Navigate to the directory where **quiz_server.py** is located, and run: `python3 quiz_server.py`
     - You should see: `Server is listening on port 12345...`
@@ -18,7 +23,7 @@ Welcome to **QuickQuizzer** – an interactive terminal quiz game with two modes
     - Ensure server and client are on the same network.
     - Use the exact command format for answers, or you may get a "Bad Request" error.
 <!-- ------------------------------------------------------- -->
-### 📍 How to Play the Game
+## 📍 How to Play the Game
 1. **Select a Game Mode**: Choose either `math` for a quiz or `hangman` for a word-guessing challenge.
 2. **Choose Your Level** (for Math Mode): Select a level to begin your adventure: `easy`, `medium`, or `hard`.
 3. **Answer Prompts**: 
@@ -28,7 +33,7 @@ Welcome to **QuickQuizzer** – an interactive terminal quiz game with two modes
 5. **Completion**: Once the game ends, see your final score, average response time, and summary. Enjoy the positive feedback and celebrate your achievement!
 6. Enjoy the quiz, and good luck! 🧠✨
 <!-- ------------------------------------------------------- -->
-### 📍 Math Quiz Mode - Custom Protocol
+## 📍 Math Quiz Mode - Custom Protocol
 
 | Status Code | Phrase                            | Description                                                                                       |
 |-------------|-----------------------------------|---------------------------------------------------------------------------------------------------|
@@ -43,7 +48,7 @@ Welcome to **QuickQuizzer** – an interactive terminal quiz game with two modes
 | 411 👋🏻      | Goodbye! Thanks for playing!      | Sent after the user type 'quit' to end the game.                                                  |
 
 <!-- ------------------------------------------------------- -->
-### 📍 Hangman Mode - Custom Protocol
+## 📍 Hangman Mode - Custom Protocol
 
 | Status Code | Phrase                            | Description                                                                                       |
 |-------------|-----------------------------------|---------------------------------------------------------------------------------------------------|
